@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+#
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XProtocol", "MyProtocolFolder\XProtocol\XProtocol.csproj", "{375BE8D4-E68F-42F7-BBBE-F0A90F5B390E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyProtocolServer", "MyProtocolFolder\MyProtocolServer\MyProtocolServer.csproj", "{30009091-1B60-4BB2-B4A9-8FBA14132CC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{1E85D69F-E30F-4099-ADCC-6FFB1996A366}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{375BE8D4-E68F-42F7-BBBE-F0A90F5B390E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{375BE8D4-E68F-42F7-BBBE-F0A90F5B390E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{375BE8D4-E68F-42F7-BBBE-F0A90F5B390E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{375BE8D4-E68F-42F7-BBBE-F0A90F5B390E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30009091-1B60-4BB2-B4A9-8FBA14132CC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30009091-1B60-4BB2-B4A9-8FBA14132CC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30009091-1B60-4BB2-B4A9-8FBA14132CC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30009091-1B60-4BB2-B4A9-8FBA14132CC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

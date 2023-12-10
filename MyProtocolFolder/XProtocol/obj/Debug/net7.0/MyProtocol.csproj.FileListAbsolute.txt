@@ -1,0 +1,11 @@
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\bin\Debug\net7.0\MyProtocol.deps.json
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\bin\Debug\net7.0\MyProtocol.dll
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\bin\Debug\net7.0\MyProtocol.pdb
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\MyProtocol.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\MyProtocol.AssemblyInfoInputs.cache
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\MyProtocol.AssemblyInfo.cs
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\MyProtocol.csproj.CoreCompileInputs.cache
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\MyProtocol.dll
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\refint\MyProtocol.dll
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\MyProtocol.pdb
+C:\Users\Booba\RiderProjects\Oris2Semester\MyProtocolFolder\MyProtocol\obj\Debug\net7.0\ref\MyProtocol.dll

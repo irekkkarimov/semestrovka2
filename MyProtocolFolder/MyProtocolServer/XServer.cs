@@ -9,7 +9,7 @@ public class XServer
 {
     private readonly Socket _socket;
     public List<ConnectedClient> Clients { get; }
-    public ConnectedClient TurnClient { get; set; }
+    public ConnectedClient? TurnClient { get; set; }
     private int _counter = 0;
     private readonly object _locker = new();
 
@@ -18,7 +18,7 @@ public class XServer
 
     public XServer()
     {
-        var ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());  
+        var ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
         var ipAddress = ipHostInfo.AddressList[0];
         Console.WriteLine(ipAddress.AddressFamily);
         _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -64,9 +64,13 @@ public class XServer
             try
             {
                 client = _socket.Accept();
-            } catch { return; }
+            }
+            catch
+            {
+                return;
+            }
 
-            Console.WriteLine($"[!] Accepted client from {(IPEndPoint) client.RemoteEndPoint}");
+            Console.WriteLine($"[!] Accepted client from {(IPEndPoint)client.RemoteEndPoint}");
 
             var c = new ConnectedClient(client, this);
             Clients.Add(c);
@@ -75,11 +79,15 @@ public class XServer
 
     public void SendUserListToAllUsers()
     {
+        if (Clients.Count == 1 || TurnClient == null)
+            TurnClient = Clients.First();
+        
         var userList = new XPacketUserList
         {
-            UserList = Clients.Select(i => i.Username).ToList()
+            UserList = Clients.Select(i => i.Username).ToList(),
+            TurnUser = TurnClient.Username
         };
-        
+
         foreach (var client in Clients)
         {
             client.QueuePacketSend(XPacketConverter.Serialize(XPacketType.UserList, userList).ToPacket());
@@ -89,14 +97,33 @@ public class XServer
     public void PerformTurn(ConnectedClient currentClient)
     {
         if (currentClient != TurnClient)
+        {
+            Console.WriteLine($"{currentClient.Username} tried to make a move, but the turn of {TurnClient.Username}");
             return;
+        }
 
         lock (_locker)
         {
             _counter++;
-            var turnResponse = new XPacketTurnResponse { Counter = _counter };
+            SwitchTurn();
+            
+            var turnResponse = new XPacketTurnResponse
+            {
+                Counter = _counter,
+                NextTurnUser = TurnClient.Username
+            };
+            
             foreach (var client in Clients)
                 client.QueuePacketSend(XPacketConverter.Serialize(XPacketType.TurnResponse, turnResponse).ToPacket());
         }
+    }
+
+    private void SwitchTurn()
+    {
+        var index = Clients.IndexOf(TurnClient);
+        if (index == Clients.Count - 1)
+            TurnClient = Clients[0];
+        else
+            TurnClient = Clients[index + 1];
     }
 }

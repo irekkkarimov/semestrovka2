@@ -60,7 +60,7 @@ public class ConnectedClient
                 ProcessUsername(packet);
                 break;
             case XPacketType.UserDisconnection:
-                ProcessUserDisconnection();
+                // ProcessUserDisconnection();
                 break;
             case XPacketType.TurnRequest:
                 ProcessTurnRequest(packet);
@@ -94,7 +94,7 @@ public class ConnectedClient
 
             var packet = _packetSendingQueue.Dequeue();
             Client.Send(packet);
-
+            Console.WriteLine(packet.Length);
             Thread.Sleep(100);
         }
     }
@@ -130,8 +130,16 @@ public class ConnectedClient
 
         var usernamePacket = XPacketConverter.Deserialize<XPacketUsername>(packet);
 
-        Console.WriteLine($"Username: {usernamePacket.Name}");
-        Username = usernamePacket.Name;
+        var username = usernamePacket.Name;
+        var counterForNameDublicate = 0;
+        while (_server.Clients.Select(i => i.Username).Contains(username))
+        {
+            counterForNameDublicate++;
+            username = $"{usernamePacket.Name}({counterForNameDublicate})";
+        }
+        
+        Console.WriteLine($"Username: {username}");
+        Username = username;
         usernamePacket.IsProcessed = true;
         Console.WriteLine("Answering to username packet");
 
@@ -150,7 +158,7 @@ public class ConnectedClient
     {
         while (Client.Connected)
         {
-            Task.Delay(5000);
+            Thread.Sleep(5000);
         }
         
         ProcessUserDisconnection();
@@ -158,9 +166,9 @@ public class ConnectedClient
     
     private void ProcessUserDisconnection()
     {
+        Client.Close();
+        Console.WriteLine($"User {Username} has disconnected.");
         _server.Clients.Remove(this);
         _server.SendUserListToAllUsers();
-        Client.Close();
-        Console.WriteLine($"User '{Username}' was disconnected");
     }
 }

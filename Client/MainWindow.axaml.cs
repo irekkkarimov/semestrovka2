@@ -6,6 +6,7 @@ using System.Windows.Markup;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using XProtocol;
 using XProtocol.CustomPacketTypes;
@@ -92,7 +93,7 @@ public partial class MainWindow : Window
     private void OnPacketReceive(byte[] packet)
     {
         var parsed = XPacket.Parse(packet);
-        
+        Console.WriteLine(parsed.PacketType);
         if (parsed != null)
             ProcessIncomingPacket(parsed);
     }
@@ -113,6 +114,9 @@ public partial class MainWindow : Window
                 break;
             case XPacketType.UserList:
                 ProcessUserList(packet);
+                break;
+            case XPacketType.TurnResponse:
+                ProcessTurnResponse(packet);
                 break;
             case XPacketType.Unknown:
                 break;
@@ -138,6 +142,7 @@ public partial class MainWindow : Window
             return;
 
         Dispatcher.UIThread.Invoke(() => UserEnterContainer.IsVisible = false);
+        Dispatcher.UIThread.Invoke(() => GameContainer.IsVisible = true);
         Dispatcher.UIThread.Invoke(() => UserNameContainer.IsVisible = true);
         Dispatcher.UIThread.Invoke(() => NameTextBlock.Text = userNamePacket.Name);
     }
@@ -160,15 +165,51 @@ public partial class MainWindow : Window
                     IsHitTestVisible = false
                 };
                 
+                if (userListPacket.TurnUser.Equals(username))
+                    listboxItem.Background = Brushes.SeaGreen;
+                    
                 UserList.Items.Add(listboxItem);
             }
         });
+        Dispatcher.UIThread.Invoke(() => UserListGrid.IsVisible = true);
         Dispatcher.UIThread.Invoke(() => UserList.IsVisible = true);
     }
 
+    private void ProcessTurnResponse(XPacket packet)
+    {
+        var turnResponse = XPacketConverter.Deserialize<XPacketTurnResponse>(packet);
+        Console.WriteLine(turnResponse.Counter);
+        Dispatcher.UIThread.Invoke(() => Counter.Text = turnResponse.Counter.ToString());
+
+        foreach (ListBoxItem? user in UserList.Items)
+        {
+            if (user == null)
+                continue;
+
+            object? usernameObject = null;
+            Dispatcher.UIThread.Invoke(() => usernameObject = user.Content);
+            
+            if (usernameObject != null && turnResponse.NextTurnUser.Equals((string)usernameObject))
+                Dispatcher.UIThread.Invoke(() => user.Background = Brushes.SeaGreen);
+            else
+                Dispatcher.UIThread.Invoke(() => user.Background = Brushes.Transparent);
+        }
+    }
+    
     private void DisconnectButton(object? sender, RoutedEventArgs e)
     {
         Disconnect();
         Close();
+    }
+
+    private void CounterIncrementButton(object? sender, RoutedEventArgs e)
+    {
+        var turnRequest = new XPacketTurnRequest();
+
+        _client.QueuePacketSend(
+            XPacketConverter.Serialize(
+                    XPacketType.TurnRequest,
+                    turnRequest)
+                .ToPacket());
     }
 }

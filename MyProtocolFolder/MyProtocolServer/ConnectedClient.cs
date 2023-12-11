@@ -62,71 +62,16 @@ public class ConnectedClient
             case XPacketType.UserDisconnection:
                 ProcessUserDisconnection();
                 break;
+            case XPacketType.TurnRequest:
+                ProcessTurnRequest(packet);
+                break;
             case XPacketType.Unknown:
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
     }
-
-    private void ProcessHandshake(XPacket packet)
-    {
-        Console.WriteLine("Recieved handshake packet.");
-
-        var handshake = XPacketConverter.Deserialize<XPacketHandshake>(packet);
-        handshake.MagicHandshakeNumber -= 15;
-
-        Console.WriteLine("Answering..");
-
-        QueuePacketSend(XPacketConverter.Serialize(XPacketType.Handshake, handshake).ToPacket());
-    }
-
-    private void ProcessString(XPacket packet)
-    {
-        Console.WriteLine("Recieved string packet.");
-
-        var stringPacket = XPacketConverter.Deserialize<XPacketString>(packet);
-
-        Console.WriteLine($"Message: {stringPacket.TestString}");
-        stringPacket.TestString = stringPacket.TestString + "__" + "ANSWER";
-        Console.WriteLine("Answering..");
-
-        QueuePacketSend(XPacketConverter.Serialize(XPacketType.String, stringPacket).ToPacket());
-    }
-
-    private void ProcessUsername(XPacket packet)
-    {
-        Console.WriteLine("Recieved username packet.");
-
-        var usernamePacket = XPacketConverter.Deserialize<XPacketUsername>(packet);
-
-        Console.WriteLine($"Username: {usernamePacket.Name}");
-        Username = usernamePacket.Name;
-        usernamePacket.IsProcessed = true;
-        Console.WriteLine("Answering..");
-
-        QueuePacketSend(XPacketConverter.Serialize(XPacketType.Username, usernamePacket).ToPacket());
-        _server.SendUserListToAllUsers();
-    }
-
-    private void CheckClientConnection()
-    {
-        while (Client.Connected)
-        {
-            Task.Delay(5000);
-        }
-        
-        ProcessUserDisconnection();
-    }
     
-    private void ProcessUserDisconnection()
-    {
-        _server.Clients.Remove(this);
-        _server.SendUserListToAllUsers();
-        Client.Close();
-        Console.WriteLine($"User '{Username}' was disconnected");
-    }
-
     public void QueuePacketSend(byte[] packet)
     {
         if (packet.Length > 256)
@@ -152,5 +97,70 @@ public class ConnectedClient
 
             Thread.Sleep(100);
         }
+    }
+
+    private void ProcessHandshake(XPacket packet)
+    {
+        Console.WriteLine("Recieved handshake packet.");
+
+        var handshake = XPacketConverter.Deserialize<XPacketHandshake>(packet);
+        handshake.MagicHandshakeNumber -= 15;
+
+        Console.WriteLine("Answering to handshake");
+
+        QueuePacketSend(XPacketConverter.Serialize(XPacketType.Handshake, handshake).ToPacket());
+    }
+
+    private void ProcessString(XPacket packet)
+    {
+        Console.WriteLine("Recieved string packet.");
+
+        var stringPacket = XPacketConverter.Deserialize<XPacketString>(packet);
+
+        Console.WriteLine($"Message: {stringPacket.TestString}");
+        stringPacket.TestString = stringPacket.TestString + "__" + "ANSWER";
+        Console.WriteLine("Answering to string packet");
+
+        QueuePacketSend(XPacketConverter.Serialize(XPacketType.String, stringPacket).ToPacket());
+    }
+
+    private void ProcessUsername(XPacket packet)
+    {
+        Console.WriteLine("Recieved username packet.");
+
+        var usernamePacket = XPacketConverter.Deserialize<XPacketUsername>(packet);
+
+        Console.WriteLine($"Username: {usernamePacket.Name}");
+        Username = usernamePacket.Name;
+        usernamePacket.IsProcessed = true;
+        Console.WriteLine("Answering to username packet");
+
+        QueuePacketSend(XPacketConverter.Serialize(XPacketType.Username, usernamePacket).ToPacket());
+        _server.SendUserListToAllUsers();
+    }
+    
+    private void ProcessTurnRequest(XPacket packet)
+    {
+        Console.WriteLine($"Client {Username} requested to make a move");
+        var turnRequest = XPacketConverter.Deserialize<XPacketTurnRequest>(packet);
+        _server.PerformTurn(this);
+    }
+
+    private void CheckClientConnection()
+    {
+        while (Client.Connected)
+        {
+            Task.Delay(5000);
+        }
+        
+        ProcessUserDisconnection();
+    }
+    
+    private void ProcessUserDisconnection()
+    {
+        _server.Clients.Remove(this);
+        _server.SendUserListToAllUsers();
+        Client.Close();
+        Console.WriteLine($"User '{Username}' was disconnected");
     }
 }

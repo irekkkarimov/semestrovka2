@@ -48,6 +48,11 @@
                     </Button>
                 </StackPanel>
             </Border>
+            <Border>
+                <StackPanel>
+                    
+                </StackPanel>
+            </Border>
         </DockPanel>
         <Border
             x:Name="UserEnterContainer"

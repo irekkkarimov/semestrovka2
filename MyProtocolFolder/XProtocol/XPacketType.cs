@@ -7,5 +7,7 @@ public enum XPacketType
     String,
     Username,
     UserList,
-    UserDisconnection
+    UserDisconnection,
+    TurnRequest,
+    TurnResponse
 }

@@ -9,6 +9,9 @@ public class XServer
 {
     private readonly Socket _socket;
     public List<ConnectedClient> Clients { get; }
+    public ConnectedClient TurnClient { get; set; }
+    private int _counter = 0;
+    private readonly object _locker = new();
 
     private bool _listening;
     private bool _stopListening;
@@ -80,6 +83,20 @@ public class XServer
         foreach (var client in Clients)
         {
             client.QueuePacketSend(XPacketConverter.Serialize(XPacketType.UserList, userList).ToPacket());
+        }
+    }
+
+    public void PerformTurn(ConnectedClient currentClient)
+    {
+        if (currentClient != TurnClient)
+            return;
+
+        lock (_locker)
+        {
+            _counter++;
+            var turnResponse = new XPacketTurnResponse { Counter = _counter };
+            foreach (var client in Clients)
+                client.QueuePacketSend(XPacketConverter.Serialize(XPacketType.TurnResponse, turnResponse).ToPacket());
         }
     }
 }

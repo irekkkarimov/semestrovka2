@@ -24,13 +24,12 @@ public partial class MainWindow : Window
 
     private void SendUserName(object? sender, RoutedEventArgs e)
     {
-        if (_client != null!)
-            return;
-
-        _client = new XClient();
-        Task.Run(Start);
-        
-        Thread.Sleep(2000);
+        if (_client == null!)
+        {
+            _client = new XClient();
+            Task.Run(Start);
+            Thread.Sleep(2000);
+        }
         
         SendUserName(new XPacketUsername
         {
@@ -93,7 +92,6 @@ public partial class MainWindow : Window
     private void OnPacketReceive(byte[] packet)
     {
         var parsed = XPacket.Parse(packet);
-        Console.WriteLine(parsed.PacketType);
         if (parsed != null)
             ProcessIncomingPacket(parsed);
     }
@@ -178,7 +176,6 @@ public partial class MainWindow : Window
     private void ProcessTurnResponse(XPacket packet)
     {
         var turnResponse = XPacketConverter.Deserialize<XPacketTurnResponse>(packet);
-        Console.WriteLine(turnResponse.Counter);
         Dispatcher.UIThread.Invoke(() => Counter.Text = turnResponse.Counter.ToString());
 
         foreach (ListBoxItem? user in UserList.Items)

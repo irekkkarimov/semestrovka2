@@ -13,6 +13,7 @@ public static class XPacketTypeManager
         RegisterType(XPacketType.UserDisconnection, 5, 0);
         RegisterType(XPacketType.TurnRequest, 6, 0);
         RegisterType(XPacketType.TurnResponse, 7, 0);
+        RegisterType(XPacketType.CardJson, 8, 0);
     }
     
     public static void RegisterType(XPacketType type, byte bType, byte bSubtype)

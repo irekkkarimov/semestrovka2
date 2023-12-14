@@ -9,5 +9,6 @@ public enum XPacketType
     UserList,
     UserDisconnection,
     TurnRequest,
-    TurnResponse
+    TurnResponse,
+    CardJson
 }

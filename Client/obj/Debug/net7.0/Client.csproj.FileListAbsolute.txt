@@ -131,3 +131,5 @@ C:\Users\Booba\RiderProjects\semestrovka2\Client\obj\Debug\net7.0\Client.pdb
 C:\Users\Booba\RiderProjects\semestrovka2\Client\obj\Debug\net7.0\Client.csproj.CopyComplete
 C:\Users\Booba\RiderProjects\semestrovka2\Client\obj\Debug\net7.0\Client.genruntimeconfig.cache
 C:\Users\Booba\RiderProjects\semestrovka2\Client\obj\Debug\net7.0\ref\Client.dll
+C:\Users\Booba\RiderProjects\semestrovka2\Client\bin\Debug\net7.0\FluxxGame.dll
+C:\Users\Booba\RiderProjects\semestrovka2\Client\bin\Debug\net7.0\FluxxGame.pdb

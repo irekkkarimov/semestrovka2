@@ -8,10 +8,16 @@
     ".NETCoreApp,Version=v7.0": {
       "MyProtocolServer/1.0.0": {
         "dependencies": {
+          "FluxxGame": "1.0.0",
           "XProtocol": "1.0.0"
         },
         "runtime": {
           "MyProtocolServer.dll": {}
+        }
+      },
+      "FluxxGame/1.0.0": {
+        "runtime": {
+          "FluxxGame.dll": {}
         }
       },
       "XProtocol/1.0.0": {
@@ -23,6 +29,11 @@
   },
   "libraries": {
     "MyProtocolServer/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FluxxGame/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

@@ -1,6 +1,6 @@
-using XProtocol.Game.Cards.Abstractions;
+using FluxxGame.Cards.Abstractions;
 
-namespace XProtocol.Game.PlayerHandler;
+namespace FluxxGame.PlayerHandler;
 
 public class Player
 {

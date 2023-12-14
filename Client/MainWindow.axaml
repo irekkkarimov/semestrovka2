@@ -2,18 +2,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewModels="clr-namespace:Client.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Client.MainWindow"
+        x:DataType="viewModels:MainWindowViewModel"
         Title="Client"
         Background="DarkGray">
     <StackPanel>
         <Grid
             x:Name="Root"
-            Height="500"
+            Height="800"
             ColumnDefinitions="Auto, *, Auto">
             <Grid
                 x:Name="UserListGrid"
-                Width="150"
+                Width="200"
                 Grid.Column="0"
                 IsVisible="False">
                 <ListBox
@@ -57,21 +59,207 @@
             </Grid>
             <Grid
                 x:Name="GameContainer"
-                Width="200"
+                Width="1200"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Center"
                 Grid.Column="1"
-                IsVisible="false">
+                IsVisible="False">
                 <StackPanel>
-                    <TextBlock
-                        x:Name="Counter"
+                    <Border
+                        Width="500"
+                        Margin="0, 40, 0, 0"
                         HorizontalAlignment="Center"
-                        Margin="0, 0, 0, 5">Not started</TextBlock>
-                    <Button
-                        x:Name="IncrementCounter"
+                        BorderBrush="Aqua"
+                        BorderThickness="2">
+                        <StackPanel
+                            x:Name="Slot1"
+                            HorizontalAlignment="Center">
+                            <TextBlock HorizontalAlignment="Center">Игрок номер 1</TextBlock>
+                            <Border
+                                Width="200"
+                                HorizontalAlignment="Center"
+                                Margin="0, 0, 0, 20"
+                                BorderBrush="Beige"
+                                BorderThickness="2">
+                                <StackPanel
+                                    x:Name="CardsInPlay1"
+                                    HorizontalAlignment="Center">
+                                    <ListBox
+                                        ItemsSource="{Binding Cards}"
+                                        Background="Transparent">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel
+                                                    Width="30"
+                                                    Height="60"
+                                                    Margin="5, 5, 5, 5">
+                                                    <TextBlock Text="{Binding Type}" />
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                    <DockPanel
+                        HorizontalAlignment="Stretch"
+                        Margin="0, 100, 0 0">
+                        <Border
+                            HorizontalAlignment="Left"
+                            BorderBrush="Aqua"
+                            BorderThickness="2">
+                            <StackPanel
+                                x:Name="Slot2">
+                                <ListBox
+                                    ItemsSource="{Binding Cards}"
+                                    Background="Transparent">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Width="30"
+                                                Height="60"
+                                                Margin="5, 5, 5, 5">
+                                                <TextBlock Text="{Binding Type}" />
+                                                <TextBlock Text="{Binding Name}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            HorizontalAlignment="Right"
+                            BorderBrush="Aqua"
+                            BorderThickness="2">
+                            <StackPanel
+                                x:Name="Slot3">
+                                <ListBox
+                                    ItemsSource="{Binding Cards}"
+                                    Background="Transparent">
+                                    <ListBox.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                    </ListBox.ItemsPanel>
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel
+                                                Width="30"
+                                                Height="60"
+                                                Margin="5, 5, 5, 5">
+                                                <TextBlock Text="{Binding Type}" />
+                                                <TextBlock Text="{Binding Name}" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+                    </DockPanel>
+                    <Border
+                        Width="800"
                         HorizontalAlignment="Center"
-                        Click="CounterIncrementButton">Increment</Button>
+                        Margin="0, 100, 0 0"
+                        BorderBrush="Aqua"
+                        BorderThickness="2">
+                        <StackPanel
+                            x:Name="SlotMain"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Bottom"
+                            Margin="10, 10, 10, 10">
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Margin="0, 0, 5, 0"
+                                    Click="AddCardToHand">
+                                    Add card to hand
+                                </Button>
+                                <Button
+                                    Click="MoveFromHandToPlay">
+                                    Move from hand to play
+                                </Button>
+                            </StackPanel>
+                            <Label HorizontalAlignment="Center">Cards in play</Label>
+                            <Border
+                                Width="200"
+                                Margin="0, 0, 0, 20"
+                                BorderBrush="Beige"
+                                BorderThickness="2">
+                                <StackPanel
+                                    x:Name="CardsInPlay">
+                                    <ListBox
+                                        ItemsSource="{Binding CardsInPlay}"
+                                        Background="Transparent">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel
+                                                    Width="50"
+                                                    Height="60">
+                                                    <TextBlock Text="{Binding Type}" />
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Border>
+                            <Label HorizontalAlignment="Center">Cards in hand</Label>
+                            <Border
+                                BorderBrush="Bisque"
+                                BorderThickness="2">
+                                <StackPanel
+                                    x:Name="CardZone">
+                                    <ListBox
+                                        ItemsSource="{Binding Cards}"
+                                        Background="Transparent">
+                                        <ListBox.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Horizontal" />
+                                            </ItemsPanelTemplate>
+                                        </ListBox.ItemsPanel>
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel
+                                                    Width="70"
+                                                    Height="100"
+                                                    Margin="0">
+                                                    <TextBlock Text="{Binding Type}" />
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
+
+                <!-- <StackPanel> -->
+                <!--     <TextBlock -->
+                <!--         x:Name="Counter" -->
+                <!--         HorizontalAlignment="Center" -->
+                <!--         Margin="0, 0, 0, 5">Not started</TextBlock> -->
+                <!--     <Button -->
+                <!--         x:Name="IncrementCounter" -->
+                <!--         HorizontalAlignment="Center" -->
+                <!--         Click="CounterIncrementButton">Increment</Button> -->
+                <!-- </StackPanel> -->
             </Grid>
             <Grid
                 x:Name="UserNameContainer"

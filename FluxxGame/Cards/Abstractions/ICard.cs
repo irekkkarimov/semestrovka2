@@ -1,4 +1,4 @@
-namespace XProtocol.Game.Cards.Abstractions;
+namespace FluxxGame.Cards.Abstractions;
 
 public interface ICard
 {

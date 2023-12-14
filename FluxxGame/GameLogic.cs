@@ -1,7 +1,7 @@
-using XProtocol.Game.Cards.Abstractions;
-using XProtocol.Game.PlayerHandler;
+using FluxxGame.Cards.Abstractions;
+using FluxxGame.PlayerHandler;
 
-namespace XProtocol.Game;
+namespace FluxxGame;
 
 public class GameLogic
 {

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyProtocolServer", "MyProto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{1E85D69F-E30F-4099-ADCC-6FFB1996A366}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluxxGame", "FluxxGame\FluxxGame.csproj", "{72397BED-7FEB-4AEE-BEF0-24163637814B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,5 +27,9 @@ Global
 		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E85D69F-E30F-4099-ADCC-6FFB1996A366}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72397BED-7FEB-4AEE-BEF0-24163637814B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72397BED-7FEB-4AEE-BEF0-24163637814B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72397BED-7FEB-4AEE-BEF0-24163637814B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72397BED-7FEB-4AEE-BEF0-24163637814B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

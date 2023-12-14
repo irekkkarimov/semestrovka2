@@ -1367,6 +1367,16 @@
           "lib/net6.0/Tmds.DBus.Protocol.dll": {}
         }
       },
+      "FluxxGame/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "compile": {
+          "bin/placeholder/FluxxGame.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FluxxGame.dll": {}
+        }
+      },
       "XProtocol/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v7.0",
@@ -4483,6 +4493,11 @@
         "tmds.dbus.protocol.nuspec"
       ]
     },
+    "FluxxGame/1.0.0": {
+      "type": "project",
+      "path": "../FluxxGame/FluxxGame.csproj",
+      "msbuildProject": "../FluxxGame/FluxxGame.csproj"
+    },
     "XProtocol/1.0.0": {
       "type": "project",
       "path": "../MyProtocolFolder/XProtocol/XProtocol.csproj",
@@ -4496,6 +4511,7 @@
       "Avalonia.Diagnostics >= 11.0.5",
       "Avalonia.Fonts.Inter >= 11.0.5",
       "Avalonia.Themes.Fluent >= 11.0.5",
+      "FluxxGame >= 1.0.0",
       "XProtocol >= 1.0.0"
     ]
   },
@@ -4528,6 +4544,9 @@
         "net7.0": {
           "targetAlias": "net7.0",
           "projectReferences": {
+            "C:\\Users\\Booba\\RiderProjects\\semestrovka2\\FluxxGame\\FluxxGame.csproj": {
+              "projectPath": "C:\\Users\\Booba\\RiderProjects\\semestrovka2\\FluxxGame\\FluxxGame.csproj"
+            },
             "C:\\Users\\Booba\\RiderProjects\\semestrovka2\\MyProtocolFolder\\XProtocol\\XProtocol.csproj": {
               "projectPath": "C:\\Users\\Booba\\RiderProjects\\semestrovka2\\MyProtocolFolder\\XProtocol\\XProtocol.csproj"
             }

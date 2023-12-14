@@ -1,5 +1,7 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Markup;
@@ -8,6 +10,10 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Threading;
+using Client.Cards;
+using Client.Models;
+using Client.ViewModels;
+using FluxxGame.Cards.Abstractions;
 using XProtocol;
 using XProtocol.CustomPacketTypes;
 
@@ -176,7 +182,7 @@ public partial class MainWindow : Window
     private void ProcessTurnResponse(XPacket packet)
     {
         var turnResponse = XPacketConverter.Deserialize<XPacketTurnResponse>(packet);
-        Dispatcher.UIThread.Invoke(() => Counter.Text = turnResponse.Counter.ToString());
+        // Dispatcher.UIThread.Invoke(() => Counter.Text = turnResponse.Counter.ToString());
 
         foreach (ListBoxItem? user in UserList.Items)
         {
@@ -191,6 +197,17 @@ public partial class MainWindow : Window
             else
                 Dispatcher.UIThread.Invoke(() => user.Background = Brushes.Transparent);
         }
+    }
+
+    private void ProcessCardReceive(XPacket packet)
+    {
+        var cardPacket = XPacketConverter.Deserialize<XPacketCard>(packet);
+        var card = JsonSerializer.Deserialize<ICard>(cardPacket.CardJson);
+
+        var cards = new ObservableCollection<KeeperCardGui>()
+        {
+            new KeeperCardGui(KeeperName.Chocolate)
+        };
     }
     
     private void DisconnectButton(object? sender, RoutedEventArgs e)
@@ -208,5 +225,27 @@ public partial class MainWindow : Window
                     XPacketType.TurnRequest,
                     turnRequest)
                 .ToPacket());
+    }
+
+    private void AddCardToHand(object? sender, RoutedEventArgs e)
+    {
+        var dataContext = DataContext as MainWindowViewModel;
+        var newCard = new KeeperCard(KeeperName.Chocolate);
+        
+        if (dataContext.Cards.Count < 8)
+            dataContext.Cards.Add(new ShowCard(newCard, newCard.Name.ToString()));
+
+    }
+
+    private void MoveFromHandToPlay(object? sender, RoutedEventArgs e)
+    {
+        var dataContext = DataContext as MainWindowViewModel;
+
+        if (!dataContext.Cards.Any())
+            return;
+        
+        var card = dataContext.Cards.Last();
+        dataContext.Cards.Remove(card);
+        dataContext.CardsInPlay.Add(card);
     }
 }

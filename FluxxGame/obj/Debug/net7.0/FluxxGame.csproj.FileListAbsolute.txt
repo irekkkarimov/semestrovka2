@@ -1,0 +1,11 @@
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\bin\Debug\net7.0\FluxxGame.deps.json
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\bin\Debug\net7.0\FluxxGame.dll
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\bin\Debug\net7.0\FluxxGame.pdb
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\FluxxGame.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\FluxxGame.AssemblyInfoInputs.cache
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\FluxxGame.AssemblyInfo.cs
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\FluxxGame.csproj.CoreCompileInputs.cache
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\FluxxGame.dll
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\refint\FluxxGame.dll
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\FluxxGame.pdb
+C:\Users\Booba\RiderProjects\semestrovka2\FluxxGame\obj\Debug\net7.0\ref\FluxxGame.dll

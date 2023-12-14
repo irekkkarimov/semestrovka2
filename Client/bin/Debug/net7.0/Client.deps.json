@@ -13,6 +13,7 @@
           "Avalonia.Diagnostics": "11.0.5",
           "Avalonia.Fonts.Inter": "11.0.5",
           "Avalonia.Themes.Fluent": "11.0.5",
+          "FluxxGame": "1.0.0",
           "XProtocol": "1.0.0"
         },
         "runtime": {
@@ -916,6 +917,11 @@
           }
         }
       },
+      "FluxxGame/1.0.0": {
+        "runtime": {
+          "FluxxGame.dll": {}
+        }
+      },
       "XProtocol/1.0.0": {
         "runtime": {
           "XProtocol.dll": {}
@@ -1418,6 +1424,11 @@
       "sha512": "sha512-QVo/Y39nTYcCKBqrZuwHjXdwaky0yTQPIT3qUTEEK2MZfDtZWrJ2XyZ59zH8LBgB2fL5cWaTuP2pBTpGz/GeDQ==",
       "path": "tmds.dbus.protocol/0.15.0",
       "hashPath": "tmds.dbus.protocol.0.15.0.nupkg.sha512"
+    },
+    "FluxxGame/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     },
     "XProtocol/1.0.0": {
       "type": "project",

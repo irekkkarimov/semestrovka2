@@ -34,3 +34,5 @@ C:\Users\Booba\RiderProjects\semestrovka2\MyProtocolFolder\MyProtocolServer\obj\
 C:\Users\Booba\RiderProjects\semestrovka2\MyProtocolFolder\MyProtocolServer\obj\Debug\net7.0\MyProtocolServer.pdb
 C:\Users\Booba\RiderProjects\semestrovka2\MyProtocolFolder\MyProtocolServer\obj\Debug\net7.0\MyProtocolServer.genruntimeconfig.cache
 C:\Users\Booba\RiderProjects\semestrovka2\MyProtocolFolder\MyProtocolServer\obj\Debug\net7.0\ref\MyProtocolServer.dll
+C:\Users\Booba\RiderProjects\semestrovka2\MyProtocolFolder\MyProtocolServer\bin\Debug\net7.0\FluxxGame.dll
+C:\Users\Booba\RiderProjects\semestrovka2\MyProtocolFolder\MyProtocolServer\bin\Debug\net7.0\FluxxGame.pdb

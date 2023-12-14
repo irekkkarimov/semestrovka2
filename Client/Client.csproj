@@ -20,6 +20,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="..\FluxxGame\FluxxGame.csproj" />
     <ProjectReference Include="..\MyProtocolFolder\XProtocol\XProtocol.csproj" />
   </ItemGroup>
 </Project>

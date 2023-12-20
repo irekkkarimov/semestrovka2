@@ -11,9 +11,11 @@ public static class XPacketTypeManager
         RegisterType(XPacketType.Username, 3, 0);
         RegisterType(XPacketType.UserList, 4, 0);
         RegisterType(XPacketType.UserDisconnection, 5, 0);
-        RegisterType(XPacketType.TurnRequest, 6, 0);
-        RegisterType(XPacketType.TurnResponse, 7, 0);
-        RegisterType(XPacketType.CardJson, 8, 0);
+        RegisterType(XPacketType.CardJson, 6, 0);
+        RegisterType(XPacketType.CardsArray, 7, 0);
+        RegisterType(XPacketType.GameStart, 8, 0);
+        RegisterType(XPacketType.TurnRequest, 9, 0);
+        RegisterType(XPacketType.TurnResponse, 10, 0);
     }
     
     public static void RegisterType(XPacketType type, byte bType, byte bSubtype)

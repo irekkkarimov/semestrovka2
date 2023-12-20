@@ -19,8 +19,8 @@ public class XPacket
     private XPacketField GetField(byte id) => Fields.FirstOrDefault(field => field.FieldId == id)!;
 
     public bool HasField(byte id) => GetField(id) != null!;
-
-
+    
+    
     public T GetValue<T>(byte id)
     {
         var field = GetField(id);
@@ -29,7 +29,8 @@ public class XPacket
             throw new Exception($"Field with ID {id} wasn't found.");
 
         var jsonString = Encoding.UTF8.GetString(field.Contents);
-        return JsonSerializer.Deserialize<T>(jsonString)!;
+        return JsonSerializer.Deserialize<T>(jsonString);
+        JsonSerializer.Deserialize<T>(jsonString);
     }
 
     public void SetValue(byte id, object? obj)

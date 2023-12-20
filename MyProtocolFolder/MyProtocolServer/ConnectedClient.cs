@@ -65,6 +65,9 @@ public class ConnectedClient
             case XPacketType.TurnRequest:
                 ProcessTurnRequest(packet);
                 break;
+            case XPacketType.GameStart:
+                _server.StartGame();
+                break;
             case XPacketType.Unknown:
                 break;
             default:
@@ -94,7 +97,6 @@ public class ConnectedClient
 
             var packet = _packetSendingQueue.Dequeue();
             Client.Send(packet);
-            Console.WriteLine(packet.Length);
             Thread.Sleep(100);
         }
     }

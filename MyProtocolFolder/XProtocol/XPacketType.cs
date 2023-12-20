@@ -8,7 +8,9 @@ public enum XPacketType
     Username,
     UserList,
     UserDisconnection,
+    CardJson,
+    CardsArray,
+    GameStart,
     TurnRequest,
     TurnResponse,
-    CardJson
 }

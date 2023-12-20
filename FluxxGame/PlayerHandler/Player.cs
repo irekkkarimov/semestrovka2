@@ -5,11 +5,15 @@ namespace FluxxGame.PlayerHandler;
 public class Player
 {
     public string Username { get; set; }
-    public List<ICard> InHand { get; set; }
-    public List<KeeperCard> Keepers { get; set; }
+    public List<ICard> InHand { get; set; } = new();
+    public List<ICard> CurrentMoveHand { get; set; } = new();
+    public List<KeeperCard> Keepers { get; set; } = new();
 
-    public static Player Create()
+    public static Player Create(string username)
     {
-        return new Player();
+        return new Player
+        {
+            Username = username
+        };
     }
 }

@@ -6,22 +6,32 @@ namespace FluxxGame;
 public class GameLogic
 {
     private Stack<ICard> Deck { get; set; }
-    private List<Player> Players { get; set; }
-    private Player Turn { get; set; }
-    private List<ICard> CurrentTurnCards { get; set; }
+    public List<Player> Players { get; set; } = new();
+    public Player Turn { get; set; }
+    private List<ICard> CurrentTurnCards { get; set; } = new();
     private int NumberOfCardsMustBePlayed { get; set; }
     public bool CurrentTurnDrawn { get; set; }
-    private List<GoalCard> CurrentGoalCards { get; set; }
-    private List<RuleCard> CurrentRules { get; set; }
+    private List<GoalCard> CurrentGoalCards { get; set; } = new();
+    private List<RuleCard> CurrentRules { get; set; } = new();
 
     private GameLogic()
     {
         Deck = Shuffle();
     }
 
-    public GameLogic Start()
+    public static GameLogic Start()
     {
         return new GameLogic();
+    }
+    
+    public void AddPlayer(Player player)
+    {
+        if (Turn is null)
+        {
+            Turn = player;
+        }
+        
+        Players.Add(player);
     }
 
     public void ProcessTurn()
@@ -62,9 +72,8 @@ public class GameLogic
         
     }
 
-    private void Draw()
+    public void Draw(int countOfCardsToDraw = 1)
     {
-        var countOfCardsToDraw = 1;
         var cards = new List<ICard>();
         
         // Creating list with all rule names that affect card draw
@@ -86,6 +95,23 @@ public class GameLogic
         // Drawing needed number of cards from the deck
         for (var i = 0; i < countOfCardsToDraw; i++)
             cards.Add(Deck.Pop());
+        
+        Turn.CurrentMoveHand.AddRange(cards);
+        Turn.InHand.AddRange(cards);
+    }
+
+    public void DrawGameStart(Player player)
+    {
+        if (!Players.Contains(player))
+            return;
+        
+        var cards = new List<ICard>();
+
+        // Drawing needed number of cards from the deck
+        for (var i = 0; i < 3; i++)
+            cards.Add(Deck.Pop());
+        
+        player.InHand.AddRange(cards);
     }
 
     private void PlayCard(ICard card)

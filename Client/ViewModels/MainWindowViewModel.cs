@@ -3,6 +3,7 @@ using System.Linq;
 using Client.Cards;
 using Client.Models;
 using FluxxGame.Cards.Abstractions;
+using FluxxGame.Models;
 
 namespace Client.ViewModels;
 

@@ -24,23 +24,34 @@ public class ConnectedClient
 
     private void ProcessIncomingPackets()
     {
-        while (true) // Слушаем пакеты, пока клиент не отключится.
+        try
         {
-            var buff = new byte[256]; // Максимальный размер пакета - 256 байт.
-            Client.Receive(buff);
-
-            buff = buff.TakeWhile((b, i) =>
+            while (true) // Слушаем пакеты, пока клиент не отключится.
             {
-                if (b != 0xFF) return true;
-                return buff[i + 1] != 0;
-            }).Concat(new byte[] { 0xFF, 0 }).ToArray();
+                var buff = new byte[256]; // Максимальный размер пакета - 256 байт.
+                Client.Receive(buff);
 
-            var parsed = XPacket.Parse(buff);
+                buff = buff.TakeWhile((b, i) =>
+                {
+                    if (b != 0xFF) return true;
+                    return buff[i + 1] != 0;
+                }).Concat(new byte[] { 0xFF, 0 }).ToArray();
 
-            if (parsed != null)
-            {
-                ProcessIncomingPacket(parsed);
+                var parsed = XPacket.Parse(buff);
+
+                if (parsed != null)
+                {
+                    ProcessIncomingPacket(parsed);
+                }
             }
+        }
+        catch (SocketException e)
+        {
+            ProcessUserDisconnection();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Exception for client {Username} with message:\n{e.Message}");
         }
     }
 
@@ -61,6 +72,9 @@ public class ConnectedClient
                 break;
             case XPacketType.UserDisconnection:
                 // ProcessUserDisconnection();
+                break;
+            case XPacketType.DrawRequest:
+                ProcessDrawRequest(packet);
                 break;
             case XPacketType.TurnRequest:
                 ProcessTurnRequest(packet);
@@ -142,18 +156,25 @@ public class ConnectedClient
         
         Console.WriteLine($"Username: {username}");
         Username = username;
-        usernamePacket.IsProcessed = true;
+        usernamePacket.IsProcessed = !_server.IsGameStarted;
         Console.WriteLine("Answering to username packet");
 
         QueuePacketSend(XPacketConverter.Serialize(XPacketType.Username, usernamePacket).ToPacket());
         _server.SendUserListToAllUsers();
+    }
+
+    private void ProcessDrawRequest(XPacket packet)
+    {
+        Console.WriteLine($"Client {Username} requested to draw cards");
+        
+        _server.DrawCards(this);
     }
     
     private void ProcessTurnRequest(XPacket packet)
     {
         Console.WriteLine($"Client {Username} requested to make a move");
         var turnRequest = XPacketConverter.Deserialize<XPacketTurnRequest>(packet);
-        _server.PerformTurn(this);
+        _server.PerformTurn(this, turnRequest.PlayedCards);
     }
 
     private void CheckClientConnection()

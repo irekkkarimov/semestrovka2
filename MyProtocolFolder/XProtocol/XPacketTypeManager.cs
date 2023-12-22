@@ -16,6 +16,8 @@ public static class XPacketTypeManager
         RegisterType(XPacketType.GameStart, 8, 0);
         RegisterType(XPacketType.TurnRequest, 9, 0);
         RegisterType(XPacketType.TurnResponse, 10, 0);
+        RegisterType(XPacketType.DrawRequest, 11, 0);
+        RegisterType(XPacketType.Win, 12, 0);
     }
     
     public static void RegisterType(XPacketType type, byte bType, byte bSubtype)

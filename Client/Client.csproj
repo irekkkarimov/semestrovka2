@@ -23,4 +23,9 @@
     <ProjectReference Include="..\FluxxGame\FluxxGame.csproj" />
     <ProjectReference Include="..\MyProtocolFolder\XProtocol\XProtocol.csproj" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Handlers\" />
+  </ItemGroup>
 </Project>

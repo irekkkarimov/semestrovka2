@@ -1,21 +1,19 @@
 using FluxxGame.Cards.Abstractions;
 
-namespace Client.Models;
+namespace FluxxGame.Models;
 
 public class ShowCard
 {
     public CardType Type { get; set; }
     public string Name { get; set; }
-    public ICard Card { get; set; }
 
     public ShowCard() { }
 
-    public ShowCard(ICard card, string name) : this(card.Type, name, card) { }
+    public ShowCard(ICard card, string name) : this(card.Type, name) { }
 
-    public ShowCard(CardType type, string name, ICard card)
+    public ShowCard(CardType type, string name)
     {
         Type = type;
         Name = name;
-        Card = card;
     }
 }

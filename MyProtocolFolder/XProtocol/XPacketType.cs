@@ -13,4 +13,6 @@ public enum XPacketType
     GameStart,
     TurnRequest,
     TurnResponse,
+    DrawRequest,
+    Win
 }

@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using FluxxGame;
 using FluxxGame.Cards.Abstractions;
+using FluxxGame.Handlers;
 using FluxxGame.PlayerHandler;
 using XProtocol;
 using XProtocol.CustomPacketTypes;
@@ -14,10 +15,10 @@ public class XServer
     private readonly Socket _socket;
     public List<ConnectedClient> Clients { get; }
     public ConnectedClient? TurnClient { get; set; }
+    public bool IsGameStarted { get; private set; }
     private int _counter = 0;
     private readonly object _locker = new();
     private GameLogic _gameLogic;
-    private bool _isGameStarted = false;
 
     private bool _listening;
     private bool _stopListening;
@@ -79,6 +80,10 @@ public class XServer
             Console.WriteLine($"[!] Accepted client from {(IPEndPoint)client.RemoteEndPoint}");
 
             var c = new ConnectedClient(client, this);
+
+            if (IsGameStarted)
+                continue;
+
             Clients.Add(c);
         }
     }
@@ -102,12 +107,12 @@ public class XServer
 
     public void StartGame()
     {
-        if (_isGameStarted)
+        if (IsGameStarted)
             return;
 
         Console.WriteLine("Game is starting...");
         _gameLogic = GameLogic.Start();
-        _isGameStarted = true;
+        IsGameStarted = true;
         var players = new List<Player>();
 
         if (Clients.Count <= 4)
@@ -122,6 +127,18 @@ public class XServer
         }
 
         SendCards();
+        Task.Run(CheckGameLogicWin);
+    }
+
+    public void DrawCards(ConnectedClient client)
+    {
+        if (_gameLogic.CurrentTurnDrawn)
+            return;
+
+        Console.WriteLine(_gameLogic.CurrentTurnDrawn);
+        _gameLogic.ProcessTurn();
+
+        SendCards();
     }
 
     public void SendCards()
@@ -133,15 +150,13 @@ public class XServer
         foreach (var player in _gameLogic.Players)
         {
             allPlayersInPlayInStringArrayList
-                .AddRange(player.Keepers.Select(card =>
-                {
-                    return new[]
+                .AddRange(player.Keepers
+                    .Select(card =>
                     {
-                        player.Username,
-                        card.Type.ToString(),
-                        card.Name.ToString()
-                    };
-                }));
+                        var id = CardHandler.GetIdByShowCard(card);
+                        return Parser.ParseKeeperInPlayCardToStringArray(id, player.Username);
+                    })
+                );
         }
 
         foreach (var client in Clients)
@@ -151,76 +166,39 @@ public class XServer
 
             var currentPlayerInHand = currentPlayer.InHand;
 
-            var currentPlayerInHandInStringArrayList = currentPlayerInHand
-                .Select(i =>
-                {
-                    switch (i.Type)
-                    {
-                        case CardType.Action:
-                        {
-                            var card = (ActionCard)i;
-                            return new[]
-                            {
-                                card.Type.ToString(),
-                                card.Name.ToString()
-                            };
-                        }
-                        case CardType.Goal:
-                        {
-                            var card = (GoalCard)i;
-                            return new[]
-                            {
-                                card.Type.ToString(),
-                                card.Name.ToString()
-                            };
-                        }
-                        case CardType.Keeper:
-                        {
-                            var card = (KeeperCard)i;
-                            return new[]
-                            {
-                                card.Type.ToString(),
-                                card.Name.ToString()
-                            };
-                        }
-                        case CardType.Rule:
-                        {
-                            var card = (RuleCard)i;
-                            return new[]
-                            {
-                                card.Type.ToString(),
-                                card.Name.ToString()
-                            };
-                        }
-                        default:
-                            return new[]
-                            {
-                                "null",
-                                "null"
-                            };
-                    }
-                })
+            var currentPlayerInHandInIdArray = currentPlayerInHand
+                .Select(CardHandler.GetIdByShowCard)
                 .ToList();
 
-            Console.WriteLine(currentPlayerInHandInStringArrayList[0][0]);
+            Console.WriteLine($"Count of clients: {Clients.Count}");
+
+            var currentTurnCardsIds = _gameLogic.CurrentTurnCards.Any()
+                ? _gameLogic.CurrentTurnCards.Select(CardHandler.GetIdByShowCard)
+                    .ToList()
+                : new List<int>();
 
             var cardsResponse = new XPacketCards
             {
-                CurrentPlayerInHand = currentPlayerInHandInStringArrayList,
+                CurrentPlayerInHand = currentPlayerInHandInIdArray,
                 AllPlayersInPlay = allPlayersInPlayInStringArrayList,
+                CountOfCardsToDraw = _gameLogic.CountOfCardsMustBeDrawn,
+                CountOfCardsToPlay = _gameLogic.CountOfCardsMustBePlayed,
+                Goal = _gameLogic.Goal,
                 CountOfPlayers = Clients.Count,
                 TurnUsername = turn,
                 IsDrawing = !isTurnDrawn,
-                IsPlaying = isTurnDrawn
+                IsPlaying = isTurnDrawn,
+                CardsAllowedToPlayInCurrentPlay = currentTurnCardsIds
             };
+
 
             client.QueuePacketSend(XPacketConverter.Serialize(XPacketType.CardsArray, cardsResponse).ToPacket());
         }
     }
 
-    public void PerformTurn(ConnectedClient currentClient)
+    public void PerformTurn(ConnectedClient currentClient, List<int> cardsPlayed)
     {
-        if (currentClient != TurnClient)
+        if (!currentClient.Username.Equals(_gameLogic.Turn.Username))
         {
             Console.WriteLine($"{currentClient.Username} tried to make a move, but the turn of {TurnClient.Username}");
             return;
@@ -228,18 +206,43 @@ public class XServer
 
         lock (_locker)
         {
-            _gameLogic.ProcessTurn();
-            SwitchTurn();
+            var cardsParsed = cardsPlayed
+                .Select(CardHandler.GetICardById)
+                .ToList();
+
+            Console.WriteLine(_gameLogic.CurrentTurnDrawn);
+            Console.WriteLine(cardsParsed.Count);
+
+            _gameLogic.ProcessTurn(cardsParsed);
+            // SwitchTurn();
             SendCards();
         }
     }
 
-    private void SwitchTurn()
+    private void CheckGameLogicWin()
     {
-        var index = Clients.IndexOf(TurnClient);
-        if (index == Clients.Count - 1)
-            TurnClient = Clients[0];
-        else
-            TurnClient = Clients[index + 1];
+        var gameResult = _gameLogic.CheckWinner();
+        Console.WriteLine("game stopped");
+
+        var winPacket = new XPacketWin
+        {
+            WinnerUsername = gameResult.Item1,
+            Goal = gameResult.Item2,
+            Message = gameResult.Item3
+        };
+
+        foreach (var client in Clients)
+        {
+            client.QueuePacketSend(XPacketConverter.Serialize(XPacketType.Win, winPacket).ToPacket());
+        }
     }
+
+    // private void SwitchTurn()
+    // {
+    //     var index = Clients.IndexOf(TurnClient);
+    //     if (index == Clients.Count - 1)
+    //         TurnClient = Clients[0];
+    //     else
+    //         TurnClient = Clients[index + 1];
+    // }
 }

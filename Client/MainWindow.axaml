@@ -27,6 +27,7 @@
                     IsVisible="False">
                 </ListBox>
                 <Button
+                    x:Name="GameStartButton"
                     Margin="0, 5, 0 0"
                     Click="StartGame">
                     Start the game
@@ -118,14 +119,15 @@
                         Margin="0, 100, 0 0">
                         <Border
                             x:Name="Slot2"
+                            MinWidth="250"
+                            MaxWidth="400"
                             HorizontalAlignment="Left"
                             BorderBrush="Aqua"
                             BorderThickness="2"
                             IsVisible="False">
                             <StackPanel
-                                MinWidth="250"
-                                MaxWidth="400"
                                 MinHeight="70">
+                                <TextBlock HorizontalAlignment="Center">Игрок номер 2</TextBlock>
                                 <ListBox
                                     ItemsSource="{Binding Players[1].CardsInPlay}"
                                     Background="Transparent">
@@ -150,17 +152,18 @@
                         </Border>
                         <Border
                             x:Name="Slot3"
+                            MinWidth="250"
+                            MaxWidth="400"
                             HorizontalAlignment="Right"
                             BorderBrush="Aqua"
-                            BorderThickness="2" 
+                            BorderThickness="2"
                             IsVisible="False">
                             <StackPanel
-                                MinWidth="250"
-                                MaxWidth="400"
                                 MinHeight="70">
                                 <ListBox
                                     ItemsSource="{Binding Players[2].CardsInPlay}"
                                     Background="Transparent">
+                                    <TextBlock HorizontalAlignment="Center">Игрок номер 3</TextBlock>
                                     <ListBox.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal" />
@@ -181,7 +184,7 @@
                         </Border>
                     </DockPanel>
                     <Border
-                        Width="800"
+                        Width="1200"
                         HorizontalAlignment="Center"
                         Margin="0, 100, 0 0"
                         BorderBrush="Aqua"
@@ -193,19 +196,23 @@
                             Margin="10, 10, 10, 10">
                             <StackPanel Orientation="Horizontal">
                                 <Button
+                                    x:Name="DrawButton"
                                     Margin="0, 0, 5, 0"
-                                    Click="AddCardToHand">
-                                    Add card to hand
+                                    Click="MakeMove"
+                                    IsVisible="False">
+                                    Draw cards
                                 </Button>
                                 <Button
-                                    Click="MoveFromHandToPlay">
-                                    Move from hand to play
+                                    x:Name="PlayButton"
+                                    Margin="0, 0, 5, 0"
+                                    Click="MakeMove"
+                                    IsVisible="False">
+                                    Play cards
                                 </Button>
                             </StackPanel>
                             <Label HorizontalAlignment="Center">Cards in play</Label>
                             <Border
                                 MinWidth="250"
-                                MaxWidth="400"
                                 MinHeight="70"
                                 Margin="0, 0, 0, 20"
                                 BorderBrush="Beige"
@@ -222,12 +229,16 @@
                                         </ListBox.ItemsPanel>
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
-                                                <StackPanel
-                                                    Width="70"
-                                                    Height="60">
-                                                    <TextBlock Text="{Binding Type}" />
-                                                    <TextBlock Text="{Binding Name}" />
-                                                </StackPanel>
+                                                <ScrollViewer
+                                                    HorizontalScrollBarVisibility="Visible"
+                                                    VerticalScrollBarVisibility="Disabled">
+                                                    <StackPanel
+                                                        Width="70"
+                                                        Height="60">
+                                                        <TextBlock Text="{Binding Type}" />
+                                                        <TextBlock Text="{Binding Name}" />
+                                                    </StackPanel>
+                                                </ScrollViewer>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
                                     </ListBox>
@@ -240,7 +251,30 @@
                                 <StackPanel
                                     x:Name="CardZone"
                                     MinHeight="100">
+                                    <StackPanel
+                                        x:Name="TurnStackPanel"
+                                        Margin="5, 5, 5, 5"
+                                        Orientation="Horizontal"
+                                        IsVisible="False">
+                                        <StackPanel
+                                            Margin="5, 5, 5, 5"
+                                            Orientation="Horizontal">
+                                            <Label>It's your move! Choose cards: </Label>
+                                            <TextBlock
+                                                x:Name="NumberOfCardsNeededToPlay">
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <StackPanel
+                                            Margin="5, 5, 5, 5"
+                                            Orientation="Horizontal">
+                                            <Label>Cards chosen to play: </Label>
+                                            <TextBlock
+                                                x:Name="NumberOfCardsChosenToPlay">
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </StackPanel>
                                     <ListBox
+                                        x:Name="CardsInHand"
                                         ItemsSource="{Binding Cards}"
                                         Background="Transparent">
                                         <ListBox.ItemsPanel>
@@ -251,10 +285,10 @@
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <StackPanel
-                                                    Width="70"
+                                                    Width="90"
                                                     Height="100"
                                                     Margin="0"
-                                                    PointerPressed="MakeMove">
+                                                    PointerPressed="ChooseCard">
                                                     <TextBlock Text="{Binding Type}" />
                                                     <TextBlock Text="{Binding Name}" />
                                                 </StackPanel>
@@ -279,64 +313,170 @@
                 <!-- </StackPanel> -->
             </Grid>
             <Grid
+                x:Name="WinGrid"
+                MinWidth="200"
+                MaxWidth="300"
+                HorizontalAlignment="Center"
+                Grid.Column="1"
+                IsVisible="false">
+                <Border
+                    Height="100"
+                    VerticalAlignment="Top"
+                    Margin="0, 100, 0, 0"
+                    BorderBrush="Aqua"
+                    BorderThickness="2">
+                    <StackPanel
+                        Margin="5, 5, 5, 5">
+                        <Label
+                            Margin="0, 2, 2, 2">
+                            Winner name:
+                        </Label>
+                        <TextBlock
+                            x:Name="WinnerUsername"
+                            Margin="0, 0, 0, 5">
+                        </TextBlock>
+                        <Label
+                            Margin="0, 0, 0, 2">
+                            Message:
+                        </Label>
+                        <TextBlock
+                            x:Name="WinMessage"
+                            Margin="0, 0, 0, 5">
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <Grid
                 x:Name="UserNameContainer"
-                Width="150"
-                Height="100"
+                Width="200"
                 VerticalAlignment="Top"
                 Grid.Column="2"
                 IsVisible="False">
                 <StackPanel>
                     <Border
-                    Margin="0, 10, 10, 10"
-                    BorderBrush="Aquamarine"
-                    BorderThickness="2"
-                    CornerRadius="5">
-                    <StackPanel>
-                        <Label Margin="5, 0, 0, 0"
-                               Padding="0"
-                               HorizontalAlignment="Left"
-                               FontSize="18"
-                               FontWeight="Bold">
-                            Your name:
-                        </Label>
-                        <TextBlock
-                            x:Name="NameTextBlock"
-                            Margin="5, 0, 0, 0"
-                            Padding="0"
-                            HorizontalAlignment="Left"
-                            FontSize="20">
-                        </TextBlock>
-                        <Button
-                            Margin="0, 0, 0, 5"
-                            HorizontalAlignment="Center"
-                            Click="DisconnectButton">
-                            Leave
-                        </Button>
-                    </StackPanel>
-                </Border>
-                <Border
-                    x:Name="Rules"
-                    HorizontalAlignment="Center"
-                    BorderBrush="Aqua"
-                    BorderThickness="2"
-                    IsVisible="False">
-                    <StackPanel
-                        Width="100"
-                        Height="70"
-                        Margin="2, 2, 2, 2">
-                        <Label
-                            Margin="0, 0, 0, 5">Current rules:</Label>
-                        <TextBlock 
-                            x:Name="Rule1"
-                            Margin="0, 0, 0, 5">Draw 1</TextBlock>
-                        <TextBlock
-                            x:Name="Rule2"
-                            Margin="0, 0, 0, 5">Play 1</TextBlock>
-                        <TextBlock
-                            x:Name="Rule3"
-                            Margin="0, 0, 0, 5"></TextBlock>
-                    </StackPanel>
-                </Border>
+                        Height="100"
+                        Margin="0, 10, 10, 10"
+                        BorderBrush="Aquamarine"
+                        BorderThickness="2"
+                        CornerRadius="5">
+                        <StackPanel>
+                            <Label Margin="5, 0, 0, 0"
+                                   Padding="0"
+                                   HorizontalAlignment="Left"
+                                   FontSize="18"
+                                   FontWeight="Bold">
+                                Your name:
+                            </Label>
+                            <TextBlock
+                                x:Name="NameTextBlock"
+                                Margin="5, 0, 0, 0"
+                                Padding="0"
+                                HorizontalAlignment="Left"
+                                FontSize="20">
+                            </TextBlock>
+                            <Button
+                                Margin="0, 0, 0, 5"
+                                HorizontalAlignment="Center"
+                                Click="DisconnectButton">
+                                Leave
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                    <Border
+                        x:Name="Rules"
+                        Margin="0, 0, 10, 10"
+                        HorizontalAlignment="Center"
+                        BorderBrush="Aqua"
+                        BorderThickness="2"
+                        IsVisible="False">
+                        <StackPanel
+                            Margin="2, 2, 2, 2">
+                            <Label
+                                Margin="0, 0, 0, 2">
+                                Current rules:
+                            </Label>
+                            <Label
+                                Margin="0, 0, 0, 1">
+                                Draw:
+                            </Label>
+                            <TextBlock
+                                x:Name="Rule1"
+                                Margin="0, 0, 0, 2">
+                                1
+                            </TextBlock>
+                            <Label
+                                Margin="0, 0, 0, 1">
+                                Play:
+                            </Label>
+                            <TextBlock
+                                x:Name="Rule2"
+                                Margin="0, 0, 0, 2">
+                                1
+                            </TextBlock>
+                            <Label
+                                Margin="0, 0, 0, 1">
+                                Rule 3:
+                            </Label>
+                            <TextBlock
+                                x:Name="Rule3"
+                                Margin="0, 0, 0, 5"
+                                IsVisible="False">
+                                No rule yet
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border
+                        x:Name="Goals"
+                        Margin="0, 0, 10, 10"
+                        HorizontalAlignment="Center"
+                        BorderBrush="Aqua"
+                        BorderThickness="2"
+                        IsVisible="False">
+                        <StackPanel
+                            Margin="2, 2, 2, 2">
+                            <Label
+                                Margin="0, 0, 0, 2">
+                                Current goals:
+                            </Label>
+                            <Label
+                                Margin="0, 0, 0, 1">
+                                Goal 1:
+                            </Label>
+                            <TextBlock
+                                x:Name="Goal1"
+                                Margin="0, 0, 0, 2">
+                                No goal yet
+                            </TextBlock>
+                            <Label
+                                Margin="0, 0, 0, 1">
+                                Goal 2:
+                            </Label>
+                            <TextBlock
+                                x:Name="Goal2"
+                                Margin="0, 0, 0, 5"
+                                IsVisible="False">
+                                No goal yet
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border
+                        x:Name="MessageBox"
+                        Margin="0, 0, 10, 10"
+                        BorderBrush="Aqua"
+                        BorderThickness="2">
+                        <StackPanel
+                            x:Name="MessageStackPanel"
+                            Margin="2, 2, 2, 2">
+                            <Label
+                                Margin="0, 0, 0, 2">
+                                Message:
+                            </Label>
+                            <TextBlock
+                                x:Name="MessageStackPanelTextBlock"
+                                Margin="0, 0, 0, 5">
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Grid>
         </Grid>

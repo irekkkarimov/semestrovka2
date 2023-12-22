@@ -5,8 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Markup;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -16,6 +14,8 @@ using Client.Cards;
 using Client.Models;
 using Client.ViewModels;
 using FluxxGame.Cards.Abstractions;
+using FluxxGame.Handlers;
+using FluxxGame.Models;
 using XProtocol;
 using XProtocol.CustomPacketTypes;
 
@@ -25,6 +25,11 @@ public partial class MainWindow : Window
 {
     public static int HandshakeMagic { get; private set; }
     private bool _isGameStarted = false;
+    private bool _isDrawn = false;
+    private List<(int, string)> _chosenCards = new();
+    private List<string> _currentMoveAllowedCards = new();
+    private string _turnUsername;
+    private int _numberOfCardsToPlay = 1;
     private XClient _client = null!;
     private string _username;
 
@@ -92,7 +97,7 @@ public partial class MainWindow : Window
                     packet)
                 .ToPacket());
     }
-    
+
     private void StartGame(object? sender, RoutedEventArgs e)
     {
         _client.QueuePacketSend(XPacketConverter
@@ -104,7 +109,7 @@ public partial class MainWindow : Window
                 })
             .ToPacket());
     }
-    
+
     private void DisconnectButton(object? sender, RoutedEventArgs e)
     {
         Disconnect();
@@ -150,6 +155,9 @@ public partial class MainWindow : Window
             case XPacketType.CardsArray:
                 ProcessCardsReceive(packet);
                 break;
+            case XPacketType.Win:
+                ProcessWinReceive(packet);
+                break;
             case XPacketType.Unknown:
                 break;
             default:
@@ -171,7 +179,10 @@ public partial class MainWindow : Window
     {
         var userNamePacket = XPacketConverter.Deserialize<XPacketUsername>(packet);
         if (!userNamePacket.IsProcessed)
+        {
+            Console.WriteLine("Server didn't accept you");
             return;
+        }
 
         _username = userNamePacket.Name;
         Dispatcher.UIThread.Invoke(() => UserEnterContainer.IsVisible = false);
@@ -211,7 +222,6 @@ public partial class MainWindow : Window
     private void ProcessTurnResponse(XPacket packet)
     {
         var turnResponse = XPacketConverter.Deserialize<XPacketTurnResponse>(packet);
-        // Dispatcher.UIThread.Invoke(() => Counter.Text = turnResponse.Counter.ToString());
 
         foreach (ListBoxItem? user in UserList.Items)
         {
@@ -244,45 +254,35 @@ public partial class MainWindow : Window
         var dataContext = Dispatcher.UIThread.Invoke(() => DataContext as MainWindowViewModel);
         var cards = XPacketConverter.Deserialize<XPacketCards>(packet);
 
-        
         var cardsCurrentPlayerInHand = cards.CurrentPlayerInHand;
         var cardsInPlay = cards.AllPlayersInPlay;
 
-        Console.WriteLine(cardsCurrentPlayerInHand.Count);
+        _isGameStarted = true;
+
+        var allCardsInHand = cardsCurrentPlayerInHand
+            .Select(CardHandler.GetShowCardById)
+            .ToList();
+
+        if (cards.CardsAllowedToPlayInCurrentPlay.Any())
+        {
+            _currentMoveAllowedCards = cards.CardsAllowedToPlayInCurrentPlay
+                .Select(i => CardHandler.GetShowCardById(i).Name)
+                .ToList();
+
+            foreach (var i in _currentMoveAllowedCards)
+            {
+                Console.WriteLine(i);
+            }
+        }
+        else
+        {
+            _currentMoveAllowedCards.Clear();
+        }
         
-        var cardsInHandKeeperActionCards = cardsCurrentPlayerInHand
-            .Where(i => i[0].Equals(CardType.Action.ToString()))
-            .Select(i => new ActionCard(StringToCardNameMapper.MapActionName(i[1])))
-            .Select(i => new ShowCard(i, i.Name.ToString()))
-            .ToArray();
-
-        var cardsInHandKeeperGoalCards = cardsCurrentPlayerInHand
-            .Where(i => i[0].Equals(CardType.Goal.ToString()))
-            .Select(i => new GoalCard(StringToCardNameMapper.MapGoalName(i[1])))
-            .Select(i => new ShowCard(i, i.Name.ToString()))
-            .ToArray();
-
-        var cardsInHandKeeperKeeperCards = cardsCurrentPlayerInHand
-            .Where(i => i[0].Equals(CardType.Keeper.ToString()))
-            .Select(i => new KeeperCard(StringToCardNameMapper.MapKeeperName(i[1])))
-            .Select(i => new ShowCard(i, i.Name.ToString()))
-            .ToArray();
-
-        var cardsInHandKeeperRuleCards = cardsCurrentPlayerInHand
-            .Where(i => i[0].Equals(CardType.Rule.ToString()))
-            .Select(i => new RuleCard(StringToCardNameMapper.MapRuleName(i[1])))
-            .Select(i => new ShowCard(i, i.Name.ToString()))
-            .ToArray();
-
-        var allCardsInHand = new List<ShowCard>();
-
-        allCardsInHand.AddRange(cardsInHandKeeperActionCards);
-        allCardsInHand.AddRange(cardsInHandKeeperGoalCards);
-        allCardsInHand.AddRange(cardsInHandKeeperKeeperCards);
-        allCardsInHand.AddRange(cardsInHandKeeperRuleCards);
-
         var allPlayersGrouped = cardsInPlay.GroupBy(i => i[0]).ToArray();
         var players = new List<Player>();
+
+        _turnUsername = cards.TurnUsername;
 
         foreach (var group in allPlayersGrouped)
         {
@@ -291,12 +291,7 @@ public partial class MainWindow : Window
 
             var keeperCards = playerCardsRaw
                 .Select(i =>
-                {
-                    var keeperName = StringToCardNameMapper.MapKeeperName(i[2]);
-                    var keeperCard = new KeeperCard(keeperName);
-                    var showCard = new ShowCard(keeperCard, i[2]);
-                    return showCard;
-                })
+                    CardHandler.GetShowCardById(int.Parse(i[1])))
                 .ToList();
 
             var player = new Player
@@ -304,18 +299,81 @@ public partial class MainWindow : Window
                 Username = playerName,
                 CardsInPlay = keeperCards
             };
-            
+
             players.Add(player);
         }
 
         var currentPlayer = players.Find(i => i.Username.Equals(_username));
         players.Remove(currentPlayer);
-        
+
         Dispatcher.UIThread.Invoke(() =>
         {
+            Rule1.Text = cards.CountOfCardsToDraw.ToString();
+            Rule2.Text = cards.CountOfCardsToPlay.ToString();
+
+            if (!string.IsNullOrEmpty(cards.Goal))
+                Goal1.Text = cards.Goal;
+
+            if (_isGameStarted)
+                GameStartButton.IsVisible = false;
+
+            if (_turnUsername.Equals(_username))
+            {
+                TurnStackPanel.IsVisible = true;
+                _numberOfCardsToPlay = cards.CountOfCardsToPlay;
+                NumberOfCardsNeededToPlay.Text = _numberOfCardsToPlay.ToString();
+                NumberOfCardsChosenToPlay.Text = "0";
+
+                var isDrawing = cards.IsDrawing;
+                _isDrawn = !cards.IsDrawing;
+
+                if (isDrawing)
+                {
+                    DrawButton.IsVisible = true;
+                    PlayButton.IsVisible = false;
+                }
+                else
+                {
+                    DrawButton.IsVisible = false;
+                    PlayButton.IsVisible = true;
+                }
+            }
+            else
+            {
+                TurnStackPanel.IsVisible = false;
+                DrawButton.IsVisible = false;
+                PlayButton.IsVisible = false;
+            }
+
+            foreach (var user in UserList.Items)
+            {
+                if (user is ListBoxItem userListBoxItem)
+                {
+                    if (userListBoxItem.Content is string castedUserName)
+                    {
+                        if (castedUserName.Equals(_turnUsername))
+                        {
+                            userListBoxItem.Background = Brushes.SeaGreen;
+                        }
+                        else
+                        {
+                            userListBoxItem.Background = Brushes.Transparent;
+                        }
+                    }
+                }
+            }
+
+            dataContext.Cards.Clear();
+            dataContext.CardsInPlay.Clear();
+
             foreach (var showCard in allCardsInHand)
             {
                 dataContext.Cards.Add(showCard);
+
+                // foreach (ListBoxItem cardInHand in CardsInHand.Items)
+                // {
+                //     cardInHand.Background = Brushes.Transparent;
+                // }
             }
 
             for (var i = 0; i < players.Count; i++)
@@ -323,7 +381,7 @@ public partial class MainWindow : Window
                 dataContext.Players[i] = players[i];
             }
 
-            switch (players.Count)
+            switch (cards.CountOfPlayers)
             {
                 case 2:
                     Slot1.IsVisible = true;
@@ -340,57 +398,142 @@ public partial class MainWindow : Window
             }
 
             Rules.IsVisible = true;
-            
+            Goals.IsVisible = true;
+            MessageBox.IsVisible = true;
+
             if (currentPlayer is not null)
                 foreach (var card in currentPlayer.CardsInPlay)
                 {
                     dataContext.CardsInPlay.Add(card);
                 }
-                
         });
     }
 
-    private void AddCardToHand(object? sender, RoutedEventArgs e)
+    private void ProcessWinReceive(XPacket packet)
     {
-        var dataContext = DataContext as MainWindowViewModel;
-        var newCard = new KeeperCard(KeeperName.Chocolate);
+        var winPacket = XPacketConverter.Deserialize<XPacketWin>(packet);
 
-        if (dataContext.Cards.Count < 8)
-            dataContext.Cards.Add(new ShowCard(newCard, newCard.Name.ToString()));
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            GameContainer.IsVisible = false;
+            WinGrid.IsVisible = true;
+            WinnerUsername.Text = winPacket.WinnerUsername;
+
+            if (winPacket.WinnerUsername.Equals(_username))
+            {
+                WinMessage.Text = "You won!!!";
+            }
+            else
+            {
+                WinMessage.Text = winPacket.Message;
+            }
+        });
     }
 
-    private void MoveFromHandToPlay(object? sender, RoutedEventArgs e)
+    private void MakeMove(object? sender, RoutedEventArgs e)
     {
-        var dataContext = DataContext as MainWindowViewModel;
+        if (!_isDrawn)
+        {
+            var drawRequest = new XPacketDrawRequest();
 
-        if (!dataContext.Cards.Any())
+            _client.QueuePacketSend(
+                XPacketConverter.Serialize(
+                        XPacketType.DrawRequest,
+                        drawRequest)
+                    .ToPacket());
+
             return;
+        }
 
-        var card = dataContext.Cards.Last();
-        dataContext.Cards.Remove(card);
-        dataContext.CardsInPlay.Add(card);
-    }
-    
-    private void CounterIncrementButton(object? sender, RoutedEventArgs e)
-    {
-        var turnRequest = new XPacketTurnRequest();
+        if (!_chosenCards.Any())
+        {
+            Console.WriteLine("Choose cards to play!");
+            PrintToMessageBox("Choose cards to play!");
+            return;
+        }
+
+        var countOfCardsInHand =
+            Dispatcher.UIThread.Invoke(() => (DataContext as MainWindowViewModel).Cards);
+
+        if ((countOfCardsInHand.Count - _chosenCards.Count > 0) && _chosenCards.Count < _numberOfCardsToPlay)
+        {
+            var leftToChoose = _numberOfCardsToPlay - _chosenCards.Count;
+            Console.WriteLine($"Choose {leftToChoose} more cards to play");
+            PrintToMessageBox($"Choose {leftToChoose} more cards to play");
+            return;
+        }
+
+        var chosenCardsInStringArrayList = _chosenCards
+            .Select(i => i.Item1)
+            .ToList();
+
+        var turnRequest = new XPacketTurnRequest
+        {
+            PlayedCards = chosenCardsInStringArrayList
+        };
 
         _client.QueuePacketSend(
             XPacketConverter.Serialize(
                     XPacketType.TurnRequest,
                     turnRequest)
                 .ToPacket());
+
+        _chosenCards.Clear();
     }
 
-    private void MakeMove(object? sender, PointerPressedEventArgs e)
+    private void ChooseCard(object? sender, PointerPressedEventArgs e)
     {
+        if (_username != _turnUsername
+            || !_isDrawn
+            || _chosenCards.Count >= _numberOfCardsToPlay)
+            return;
+
         if (sender is StackPanel clickedItem)
         {
-            Console.WriteLine("stack panel");
             var dataContext = clickedItem.DataContext;
 
             if (dataContext is ShowCard card)
-                Console.WriteLine(card.Name);
+            {
+                if (_currentMoveAllowedCards.Any())
+                {
+                    if (!_currentMoveAllowedCards.Contains(card.Name))
+                    {
+                        Console.WriteLine("This card is not allowed");
+                        PrintToMessageBox("This card is not allowed");
+                        return;
+                    }
+                }
+                
+                var mainWindowViewModel = DataContext as MainWindowViewModel;
+
+                var chosenCardsNames = _chosenCards
+                    .Select(i => i.Item2)
+                    .ToList();
+
+                if (chosenCardsNames.Contains(card.Name))
+                {
+                    Console.WriteLine("This card was already been chosen");
+                    PrintToMessageBox("This card was already been chosen");
+                    return;
+                }
+
+                _chosenCards.Add((CardHandler.GetIdByCardName(card.Name), card.Name));
+                Console.WriteLine($"Card of type {card.Type} and name of {card.Name} was choosen for play");
+                PrintToMessageBox($"Card of type {card.Type} and name of {card.Name} was choosen for play");
+
+                var leftToChoose = _numberOfCardsToPlay - _chosenCards.Count;
+                Dispatcher.UIThread.Invoke(() =>
+                {
+                    NumberOfCardsNeededToPlay.Text = leftToChoose.ToString();
+                    NumberOfCardsChosenToPlay.Text = _chosenCards.Count.ToString();
+                });
+            }
         }
+    }
+
+    private void PrintToMessageBox(string message)
+    {
+        Dispatcher.UIThread.Invoke(() =>
+            MessageStackPanelTextBlock.Text = message);
     }
 }
